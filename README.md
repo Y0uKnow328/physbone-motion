@@ -10,7 +10,7 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 
 ## English Quick Start
 
-1. Open `Tools > Avatar Chamber > PhysBone 动态预览`（菜单标签固定为中文）.
+1. Open `Tools > Avatar Chamber > PhysBone 动态预览`.
 2. Select any part of your avatar in the Hierarchy.
 3. Choose a target PhysBone, adjust the parameters, or click a preset.
 4. To change PhysBone parameters in Play Mode, edit them in the **PhysBone** tab, then use **Save Changes** or **Save & Exit**.
@@ -23,7 +23,7 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 
 - 选中角色任意部位（骨骼、网格、Avatar 根节点）即可显示通用操作面板
 - 「目标动骨」下拉框在角色的所有 `VRCPhysBone` 之间切换
-- 7 种预设动作：上下摆动、左右摇摆、前后晃动、画圈、高频抖动、风吹、脉冲回弹
+- 7 种预设动作：上下摆动、左右摇摆、前后晃动、画圈、高频抖动、风吹、弹性
 - 可调幅度、频率、时长；时长为 `0` 表示循环播放
 - Play Mode 中可直接编辑 PhysBone 参数，退出后按需写回场景
 - 「动骨」标签内置完整版 VRC PhysBone 设置
@@ -31,8 +31,6 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 - `X` 快捷键把 Scene 视图中心移到鼠标下方
 - 构建阻止：阻止 VRCFury、MA / NDMF 在 Play Mode 处理 Avatar
 - 界面支持中文 / English / 日本語 / 한국어
-- 不依赖 VRChat SDK 程序集：未安装 SDK 时仍可编译，窗口会给出提示
-- 只包含 Editor 代码，不向角色添加运行时脚本
 
 ## 安装
 
@@ -46,13 +44,11 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 2. Unity → Window → Package Manager → `+` → Add package from git URL
 3. 粘贴仓库地址
 
-> 公开仓库可直接使用 HTTPS；私有仓库需要配置对应的 Git 凭据。
 
 ### 环境要求
 
 - Unity 2022.3
-- VRChat Avatars SDK（需要 `VRCPhysBone`）
-- VRCFury / Modular Avatar 为可选项，仅用于构建阻止功能
+- VRChat Avatars SDK
 
 ## 快速开始
 
