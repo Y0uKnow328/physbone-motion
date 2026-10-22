@@ -1,7 +1,7 @@
 {
   "name": "com.avatarchamber.physbone-motion",
   "displayName": "PhysBone Motion",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "unity": "2022.3",
   "description": "Inspect and edit VRChat PhysBone dynamics and chain motion from an editor window with preset motions. Works in any Unity project and reports clearly when the VRChat SDK is missing.",
   "license": "MIT",

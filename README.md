@@ -2,7 +2,7 @@
 
 **在 Unity 编辑器里查看 VRChat PhysBone 的摆动、惯性和链式联动，并直接编辑完整的 `VRCPhysBone` 参数，减少手动进出 Play Mode 和反复晃动角色的次数。**
 
-Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本語 / 한국어 · v1.1.0
+Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本語 / 한국어 · v1.1.1
 
 > Inspect VRChat PhysBone motion and edit the full `VRCPhysBone` settings directly in the Unity editor, without repeatedly entering Play Mode and shaking the avatar by hand.
 

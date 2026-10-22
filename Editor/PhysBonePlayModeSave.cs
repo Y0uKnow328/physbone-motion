@@ -94,6 +94,29 @@ namespace AvatarChamber.PhysBoneMotion
             public string value;
         }
 
+        // JsonUtility cannot serialize AnimationCurve directly (it returns "{}").
+        // Store the curve keys and wrap modes explicitly instead.
+        [Serializable]
+        private class SavedCurveKeyframe
+        {
+            public float time;
+            public float value;
+            public float inTangent;
+            public float outTangent;
+            public float inWeight;
+            public float outWeight;
+            public int weightedMode;
+            public int tangentMode;
+        }
+
+        [Serializable]
+        private class SavedCurve
+        {
+            public int preWrapMode;
+            public int postWrapMode;
+            public List<SavedCurveKeyframe> keys = new List<SavedCurveKeyframe>();
+        }
+
         [Serializable]
         private class SavedSnapshot
         {
@@ -569,7 +592,7 @@ namespace AvatarChamber.PhysBoneMotion
                     return true;
 
                 case SerializedPropertyType.AnimationCurve:
-                    value = JsonUtility.ToJson(property.animationCurveValue);
+                    value = SerializeCurve(property.animationCurveValue);
                     return true;
 
                 default:
@@ -585,6 +608,88 @@ namespace AvatarChamber.PhysBoneMotion
                 parts[i] = values[i].ToString("R", CultureInfo.InvariantCulture);
             }
             return string.Join("|", parts);
+        }
+
+        private static string SerializeCurve(AnimationCurve curve)
+        {
+            if (curve == null)
+            {
+                return string.Empty;
+            }
+
+            var saved = new SavedCurve
+            {
+                preWrapMode = (int)curve.preWrapMode,
+                postWrapMode = (int)curve.postWrapMode
+            };
+
+            foreach (var key in curve.keys)
+            {
+                saved.keys.Add(new SavedCurveKeyframe
+                {
+                    time = key.time,
+                    value = key.value,
+                    inTangent = key.inTangent,
+                    outTangent = key.outTangent,
+                    inWeight = key.inWeight,
+                    outWeight = key.outWeight,
+                    weightedMode = (int)key.weightedMode,
+                    tangentMode = key.tangentMode
+                });
+            }
+
+            return JsonUtility.ToJson(saved);
+        }
+
+        private static AnimationCurve DeserializeCurve(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
+            SavedCurve saved;
+            try
+            {
+                saved = JsonUtility.FromJson<SavedCurve>(value);
+            }
+            catch
+            {
+                return null;
+            }
+
+            if (saved == null)
+            {
+                return null;
+            }
+
+            var count = saved.keys != null ? saved.keys.Count : 0;
+            var keys = new Keyframe[count];
+            for (var i = 0; i < count; i++)
+            {
+                var source = saved.keys[i];
+                if (source == null)
+                {
+                    keys[i] = new Keyframe();
+                    continue;
+                }
+
+                var key = new Keyframe(
+                    source.time,
+                    source.value,
+                    source.inTangent,
+                    source.outTangent);
+                key.inWeight = source.inWeight;
+                key.outWeight = source.outWeight;
+                key.weightedMode = (WeightedMode)source.weightedMode;
+                key.tangentMode = source.tangentMode;
+                keys[i] = key;
+            }
+
+            var curve = new AnimationCurve(keys);
+            curve.preWrapMode = (WrapMode)saved.preWrapMode;
+            curve.postWrapMode = (WrapMode)saved.postWrapMode;
+            return curve;
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
@@ -824,7 +929,7 @@ namespace AvatarChamber.PhysBoneMotion
                         return true;
 
                     case SerializedPropertyType.AnimationCurve:
-                        var curve = JsonUtility.FromJson<AnimationCurve>(value);
+                        var curve = DeserializeCurve(value);
                         if (curve == null)
                         {
                             return false;
