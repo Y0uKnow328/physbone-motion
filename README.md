@@ -2,7 +2,7 @@
 
 **在 Unity 编辑器里查看 VRChat PhysBone 的摆动、惯性和链式联动，并直接编辑完整的 `VRCPhysBone` 参数，减少手动进出 Play Mode 和反复晃动角色的次数。**
 
-Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本語 / 한국어 · v1.0.0
+Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本語 / 한국어 · v1.1.0
 
 > Inspect VRChat PhysBone motion and edit the full `VRCPhysBone` settings directly in the Unity editor, without repeatedly entering Play Mode and shaking the avatar by hand.
 
@@ -27,8 +27,11 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 - 可调幅度、频率、时长；时长为 `0` 表示循环播放
 - Play Mode 中可直接编辑 PhysBone 参数，退出后按需写回场景
 - 「动骨」标签内置完整版 VRC PhysBone 设置
-- Scene 视图显示所有 PhysBone 骨骼链；当前目标为黄色，其余为青色
-- `X` 快捷键把 Scene 视图中心移到鼠标下方
+- 「高亮动骨」加粗显示所有 PhysBone 骨骼链；当前目标为黄色，其余为青色，点击关节圆点即可选中对应骨骼
+- Scene 视图在角色中心显示角色操纵杆：同时提供箭头移动和圆环旋转；选中任意部件时也能操作整个模型，且不会改变当前选择
+- 保存时会收集本次 Play Mode 中修改过的所有 PhysBone，不会因为切换目标而漏存
+- 支持「保存并重载」：保存后立即重新进入 Play Mode 复测
+- 可在窗口内直接按下任意按键，自定义「在鼠标下方放置 Gizmo」的快捷键（默认 `X`）
 - 构建阻止：阻止 VRCFury、MA / NDMF 在 Play Mode 处理 Avatar
 - 界面支持中文 / English / 日本語 / 한국어
 
@@ -54,11 +57,12 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 1. 打开菜单 `Tools/Avatar Chamber/PhysBone 动态`
 2. 在 Hierarchy 中选中角色的任意部位（骨骼、网格、Avatar 根节点都可以）
 3. 在「预览」标签用「目标动骨」下拉框选择要预览的 PhysBone
-4. 调整幅度、频率、时长，点击任意预设动作；时长为 `0` 表示循环播放
-5. 需要改 PhysBone 参数时切到「动骨」标签
-6. 需要切换界面语言、修改驱动方式、目标动骨或构建阻止时切到「设置」标签
-7. 第一次点击动作会自动进入 Play Mode；停止按钮或退出 Play Mode 后 Transform 自动复原
-8. Play Mode 中改过的 PhysBone 参数，用顶部「保存更改」或「保存并退出」写回场景；「退出预览」会放弃这些修改
+4. 角色中心会显示操纵杆：拖箭头移动、拖圆环旋转整个模型；操作过程中当前选中的部件保持不变
+5. 调整幅度、频率、时长，点击任意预设动作；时长为 `0` 表示循环播放
+6. 需要改 PhysBone 参数时切到「动骨」标签
+7. 需要切换界面语言、修改驱动方式、目标动骨或构建阻止时切到「设置」标签
+8. 第一次点击动作会自动进入 Play Mode；停止按钮或退出 Play Mode 后 Transform 自动复原
+9. Play Mode 中改过的 PhysBone 参数，用顶部「保存更改」「保存并重载」或「保存并退出」写回场景；「退出预览」会放弃这些修改
 
 ## 界面
 
@@ -88,13 +92,17 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 位于「预览」标签最上方：
 
 - **物理预览**：显示当前是否处于预览 / Play Mode，以及是否可以保存更改
-- **显示骨骼**：在 Scene 视图绘制角色所有 PhysBone 的骨骼链；当前目标为黄色，其余为青色
-- **重新居中 Gizmo**：把 Scene 视图中心移到目标 PhysBone 的根骨骼
-- **在鼠标下方放置 Gizmo**：把视图中心放到鼠标所指的位置
-- **设置放置快捷键...**：打开 Unity 快捷键设置；默认 `X` 在 Scene 视图把中心移到鼠标下方
-- **保存更改**：把 Play Mode 中的参数修改暂存，退出 Play Mode 后写回场景
+- **显示角色操纵杆**：在角色中心（Humanoid Hips，找不到时用模型包围盒中心）显示标准移动箭头和旋转圆环；两种手柄同时可用。拖动时操作整个 Avatar，当前 Hierarchy 选择保持不变；Play Mode 中可实时观察 PhysBone 的惯性与链式联动
+- **高亮动骨**：加粗绘制角色所有 PhysBone 骨骼链；当前目标为黄色，其余为青色。点击链条上的圆点可直接选中对应骨骼，比选中细线更容易
+- **重新居中 Gizmo**：把操纵杆锚点放回角色中心，不移动 Scene 视图相机
+- **在鼠标下方放置 Gizmo**：用鼠标射线把操纵杆锚点放到鼠标指向的世界位置，不移动 Scene 视图相机
+- **设置快捷键...**：点击后按钮变为「请按任意按键...」，按下任意按键即可绑定「在鼠标下方放置 Gizmo」；按 `Esc` 取消。当前快捷键显示在按钮下方
+- **停止并复原**：位于「预设动作」标题右侧；播放中可用，停止当前预设或动画并恢复变换
+- **保存更改**：保存本次 Play Mode 中修改过的**所有** PhysBone，包括先前选中过、之后又切换到其它骨骼的组件；退出 Play Mode 后写回场景
+- **保存并重载**：保存所有改动，退出 Play Mode 后立即重新进入，便于直接复测
 - **保存并退出**：保存并立即退出 Play Mode
 - **退出预览**：放弃本次参数修改并退出 Play Mode
+- 以上四个保存/退出按钮排成两行，每行两个
 - **使用 Inspector 修改物理组件**：打开 VRC PhysBone 原面板
 
 ## 构建阻止
@@ -137,9 +145,11 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 
 - 使用 `SerializedProperty` 绘制，列表、曲线、引用、权限过滤都可以编辑
 - 编辑会记录到 Unity 的撤销系统（`Ctrl+Z`）
-- 运行模式下也可以编辑；退出 Play Mode 前用顶部「保存更改」或「保存并退出」写回场景
-- 写回只覆盖配置字段；根骨骼、忽略骨骼、碰撞体列表等对象引用和列表不会保存
+- 运行模式下也可以编辑；退出 Play Mode 前用顶部「保存更改」「保存并重载」或「保存并退出」写回场景
+- Play Mode 中**新建的 PhysBone** 会在退出时重建到原骨骼上，并写回可保存参数；新建的骨骼 / GameObject 本身无法跨 Play Mode 保留
+- 写回覆盖配置字段和根骨骼引用；忽略骨骼、碰撞体列表等对象引用和列表不会保存
 - `isAnimated` 不参与写回（从动骨根节点预览时会被临时开启），请在编辑模式修改
+- 角度限位在 Play Mode 中实时参与解算；「预览」标签会显示当前限位类型与 X/Z 角度，`None` 会给出警告。要查看限位范围，在「动骨 > 选项」打开「显示 Gizmo」并调高「限位透明度」
 - 如果 FX 层正在动画驱动 PhysBone 参数，请先关闭对应动画再保存，避免把动画值写回场景
 
 ## 参数说明
@@ -183,7 +193,7 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 
 - 只支持场景中的 PhysBone，不支持直接预览 Prefab 资产
 - 动作幅度单位取决于「运动方式」：位移是米，旋转是度
-- 预设动作只改 Play Mode 内的 Transform；PhysBone 参数只有在点击「保存更改」或「保存并退出」后才会写回场景
+- 预设动作只改 Play Mode 内的 Transform；PhysBone 参数只有在点击「保存更改」「保存并重载」或「保存并退出」后才会写回场景
 - 建议保持 Unity 窗口在前台；Unity 在后台时 Play Mode 可能暂停，预览会跟着停住
 - Gesture Manager / AV3 Emulator 同时驱动同一骨骼时可能互相覆盖，建议关闭它们的自动动作后再对比
 - 进入 Play Mode 会触发域重载，首次进入可能需要等待几秒

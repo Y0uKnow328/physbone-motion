@@ -78,6 +78,7 @@ namespace AvatarChamber.PhysBoneMotion
         [SerializeField] private bool _showTargetInfo = true;
         [SerializeField] private bool _showDriverSettings = true;
         [SerializeField] private int _currentTab;
+        private bool _capturingShortcut;
 
         private readonly List<AnimationClip> _locomotionClips = new List<AnimationClip>();
         private readonly List<AnimationClip> _detailedAnimationClips = new List<AnimationClip>();
@@ -112,6 +113,7 @@ namespace AvatarChamber.PhysBoneMotion
             PhysBoneLocalization.LanguageChanged += OnLanguageChanged;
             titleContent = new GUIContent(T("PhysBone 动态"));
             RefreshSelection();
+            SyncOverlayTarget();
         }
 
         private void OnDisable()
@@ -121,11 +123,16 @@ namespace AvatarChamber.PhysBoneMotion
             EditorApplication.update -= OnEditorUpdate;
             PhysBoneMotionDriver.StateChanged -= Repaint;
             PhysBoneLocalization.LanguageChanged -= OnLanguageChanged;
+
+            // Let the overlay fall back to the Hierarchy selection while this window
+            // is closed, so it never keeps drawing a stale target.
+            PhysBonePreviewOverlay.SetTargetPhysBone(null);
         }
 
         private void OnSelectionChanged()
         {
             RefreshSelection();
+            SyncOverlayTarget();
             ResetAnimationClipState();
             Repaint();
         }
@@ -133,7 +140,14 @@ namespace AvatarChamber.PhysBoneMotion
         private void OnPlayModeStateChanged(PlayModeStateChange state)
         {
             RefreshSelection();
+            SyncOverlayTarget();
             Repaint();
+        }
+
+        private void SyncOverlayTarget()
+        {
+            PhysBonePreviewOverlay.SetTargetPhysBone(_physBone);
+            PhysBonePlayModeSave.TrackTarget(_physBone);
         }
 
         private void OnLanguageChanged()
@@ -235,12 +249,16 @@ namespace AvatarChamber.PhysBoneMotion
             var newIndex = EditorGUILayout.Popup(T("目标动骨"), currentIndex, names);
             if (newIndex != currentIndex)
             {
-                _physBone = _avatarPhysBones[newIndex];
+                // Route through the shared setter so the Scene view overlay follows
+                // the dropdown selection instead of keeping the previous PhysBone.
+                SetTargetPhysBone(_avatarPhysBones[newIndex]);
             }
         }
 
         private void OnGUI()
         {
+            HandleShortcutCapture();
+
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
             _currentTab = GUILayout.Toolbar(
@@ -265,6 +283,80 @@ namespace AvatarChamber.PhysBoneMotion
             }
 
             EditorGUILayout.EndScrollView();
+        }
+
+        private void HandleShortcutCapture()
+        {
+            if (!_capturingShortcut)
+            {
+                return;
+            }
+
+            var current = Event.current;
+            if (current == null || current.type != EventType.KeyDown)
+            {
+                return;
+            }
+
+            var key = current.keyCode;
+            if (key == KeyCode.None || IsModifierKey(key) || current.control || current.alt)
+            {
+                // Keep waiting for a plain key. Modifier-only presses and
+                // Ctrl/Alt combinations are not used as the shortcut.
+                return;
+            }
+
+            current.Use();
+
+            if (key == KeyCode.Escape)
+            {
+                _capturingShortcut = false;
+                Repaint();
+                return;
+            }
+
+            if (PhysBonePreviewOverlay.SetPlaceShortcut(key))
+            {
+                _capturingShortcut = false;
+                ShowNotification(new GUIContent(F("放置快捷键已设为 {0}", key.ToString())));
+            }
+            else
+            {
+                ShowNotification(new GUIContent(T("快捷键设置失败，请重试。")));
+            }
+
+            Repaint();
+        }
+
+        private static bool IsModifierKey(KeyCode key)
+        {
+            switch (key)
+            {
+                case KeyCode.LeftShift:
+                case KeyCode.RightShift:
+                case KeyCode.LeftControl:
+                case KeyCode.RightControl:
+                case KeyCode.LeftAlt:
+                case KeyCode.RightAlt:
+                case KeyCode.LeftCommand:
+                case KeyCode.RightCommand:
+                case KeyCode.LeftWindows:
+                case KeyCode.RightWindows:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void OnLostFocus()
+        {
+            if (!_capturingShortcut)
+            {
+                return;
+            }
+
+            _capturingShortcut = false;
+            Repaint();
         }
 
         private void DrawBoneTab()
@@ -309,7 +401,25 @@ namespace AvatarChamber.PhysBoneMotion
                 T(EditorApplication.isPlaying ? "状态：可随时保存更改" : "状态：编辑模式"),
                 EditorStyles.miniLabel);
 
-            var showBones = EditorGUILayout.Toggle(T("显示骨骼"), PhysBonePreviewOverlay.ShowBones);
+            var showGizmo = EditorGUILayout.Toggle(
+                C(
+                    "显示角色操纵杆",
+                    "在角色中心显示移动箭头和旋转圆环；选中任意部件时也能拖动整个模型，且不会改变当前选择。"),
+                PhysBonePreviewOverlay.ShowAvatarGizmo);
+            if (showGizmo != PhysBonePreviewOverlay.ShowAvatarGizmo)
+            {
+                PhysBonePreviewOverlay.ShowAvatarGizmo = showGizmo;
+            }
+
+            EditorGUILayout.LabelField(
+                T("拖动箭头移动整个角色，拖动圆环旋转；Play Mode 中可实时观察 PhysBone 的惯性与链式联动。"),
+                EditorStyles.miniLabel);
+
+            var showBones = EditorGUILayout.Toggle(
+                C(
+                    "高亮动骨",
+                    "加粗显示带 VRCPhysBone 的骨骼链；点击骨骼链上的圆点可直接选中对应骨骼。"),
+                PhysBonePreviewOverlay.ShowBones);
             if (showBones != PhysBonePreviewOverlay.ShowBones)
             {
                 PhysBonePreviewOverlay.ShowBones = showBones;
@@ -317,53 +427,108 @@ namespace AvatarChamber.PhysBoneMotion
 
             if (GUILayout.Button(T("重新居中 Gizmo"), GUILayout.Height(22f)))
             {
-                PhysBonePreviewOverlay.Recenter(_physBone);
+                PhysBonePreviewOverlay.RecenterGizmo(_physBone);
             }
 
             if (GUILayout.Button(T("在鼠标下方放置 Gizmo"), GUILayout.Height(22f)))
             {
-                PhysBonePreviewOverlay.PlaceAtMouse();
+                PhysBonePreviewOverlay.PlaceGizmoAtMouse();
             }
 
-            if (GUILayout.Button(
-                C(
-                    "设置放置快捷键...",
-                    "默认 X：在 Scene 视图把中心移到鼠标下方。"),
-                GUILayout.Height(22f)))
+            var shortcutLabel = _capturingShortcut ? T("请按任意按键...") : T("设置快捷键...");
+            var shortcutTooltip = _capturingShortcut
+                ? T("按任意按键完成绑定；按 Esc 取消。")
+                : T("点击后按任意按键，即可绑定“在鼠标下方放置 Gizmo”的快捷键。");
+            if (GUILayout.Button(new GUIContent(shortcutLabel, shortcutTooltip), GUILayout.Height(22f)))
             {
-                EditorApplication.ExecuteMenuItem("Edit/Shortcuts");
+                _capturingShortcut = true;
+                GUI.FocusControl(null);
+                Repaint();
             }
 
-            using (new EditorGUI.DisabledScope(!EditorApplication.isPlaying || _physBone == null))
-            {
-                var previousColor = GUI.backgroundColor;
+            EditorGUILayout.LabelField(
+                F("快捷键：{0} — 在鼠标下方放置 Gizmo", PhysBonePreviewOverlay.GetPlaceShortcutDisplay()),
+                EditorStyles.miniLabel);
 
+            // If the avatar had no PhysBone before, the window target can still be
+            // null after a new component is added in Play Mode. Fall back to the
+            // component on the selected object so the save buttons stay usable.
+            var saveTarget = _physBone;
+            if (saveTarget == null && Selection.activeGameObject != null)
+            {
+                saveTarget = PhysBoneReflection.FindPhysBoneInParents(
+                    Selection.activeGameObject);
+            }
+
+            var canSave = EditorApplication.isPlaying && saveTarget != null;
+            var canExit = EditorApplication.isPlaying;
+            var previousColor = GUI.backgroundColor;
+
+            EditorGUILayout.BeginHorizontal();
+            using (new EditorGUI.DisabledScope(!canSave))
+            {
                 GUI.backgroundColor = new Color(0.35f, 0.7f, 0.35f);
-                var saveClicked = GUILayout.Button(T("保存更改"), GUILayout.Height(24f));
-
-                GUI.backgroundColor = new Color(0.35f, 0.65f, 0.35f);
-                var saveAndExitClicked = GUILayout.Button(T("保存并退出"), GUILayout.Height(24f));
-
-                GUI.backgroundColor = new Color(0.8f, 0.3f, 0.3f);
-                var exitClicked = GUILayout.Button(T("退出预览"), GUILayout.Height(24f));
+                if (GUILayout.Button(
+                    new GUIContent(
+                        T("保存更改"),
+                        T("保存本次 Play Mode 中修改过的所有 PhysBone。")),
+                    GUILayout.Height(24f),
+                    GUILayout.ExpandWidth(true)))
+                {
+                    PhysBonePlayModeSave.QueueSave(saveTarget);
+                }
 
                 GUI.backgroundColor = previousColor;
+            }
 
-                if (saveClicked)
+            using (new EditorGUI.DisabledScope(!canSave))
+            {
+                GUI.backgroundColor = new Color(0.3f, 0.55f, 0.8f);
+                if (GUILayout.Button(
+                    new GUIContent(
+                        T("保存并重载"),
+                        T("保存所有改动，退出 Play Mode 后立即重新进入，便于重新测试。")),
+                    GUILayout.Height(24f),
+                    GUILayout.ExpandWidth(true)))
                 {
-                    PhysBonePlayModeSave.QueueSave(_physBone);
+                    PhysBonePlayModeSave.SaveAndReload(saveTarget);
                 }
 
-                if (saveAndExitClicked)
+                GUI.backgroundColor = previousColor;
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            using (new EditorGUI.DisabledScope(!canSave))
+            {
+                GUI.backgroundColor = new Color(0.35f, 0.65f, 0.35f);
+                if (GUILayout.Button(
+                    T("保存并退出"),
+                    GUILayout.Height(24f),
+                    GUILayout.ExpandWidth(true)))
                 {
-                    PhysBonePlayModeSave.SaveAndExit(_physBone);
+                    PhysBonePlayModeSave.SaveAndExit(saveTarget);
                 }
 
-                if (exitClicked)
+                GUI.backgroundColor = previousColor;
+            }
+
+            using (new EditorGUI.DisabledScope(!canExit))
+            {
+                GUI.backgroundColor = new Color(0.8f, 0.3f, 0.3f);
+                if (GUILayout.Button(
+                    T("退出预览"),
+                    GUILayout.Height(24f),
+                    GUILayout.ExpandWidth(true)))
                 {
                     PhysBonePlayModeSave.ExitWithoutSaving();
                 }
+
+                GUI.backgroundColor = previousColor;
             }
+
+            EditorGUILayout.EndHorizontal();
 
             if (PhysBonePlayModeSave.HasPendingSave)
             {
@@ -437,10 +602,12 @@ namespace AvatarChamber.PhysBoneMotion
             DrawMotionSettings();
             EditorGUILayout.Space(8f);
 
-            using (new EditorGUI.DisabledScope(_physBone == null))
-            {
-                DrawPresetButtons();
-            }
+            DrawPresetButtons();
+
+            EditorGUILayout.LabelField(
+                T("限位在 Play Mode 中实时参与解算；限位范围由 VRChat SDK 的 Gizmo 显示，可在「动骨 > 选项」打开「显示 Gizmo」并调高「限位透明度」。"),
+                EditorStyles.miniLabel);
+            DrawLimitStatus();
 
             EditorGUILayout.Space(8f);
             DrawPlaybackStatus();
@@ -1120,6 +1287,7 @@ namespace AvatarChamber.PhysBoneMotion
             }
 
             ResetAnimationClipState();
+            SyncOverlayTarget();
             Repaint();
         }
 
@@ -1329,26 +1497,56 @@ namespace AvatarChamber.PhysBoneMotion
 
         private void DrawPresetButtons()
         {
-            EditorGUILayout.LabelField(T("预设动作"), EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label(
+                T("预设动作"),
+                EditorStyles.boldLabel,
+                GUILayout.ExpandWidth(false));
+            GUILayout.FlexibleSpace();
 
-            const int columns = 3;
-            for (var i = 0; i < PresetButtons.Length; i += columns)
+            var playing = PhysBoneMotionDriver.IsPlayingMotion
+                || PhysBoneMotionDriver.IsPlayingClip;
+            using (new EditorGUI.DisabledScope(!playing))
             {
-                EditorGUILayout.BeginHorizontal();
-                for (var j = 0; j < columns; j++)
+                var previousColor = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(0.8f, 0.35f, 0.35f);
+                if (GUILayout.Button(
+                    T("停止并复原"),
+                    GUILayout.Width(120f),
+                    GUILayout.Height(20f)))
                 {
-                    var index = i + j;
-                    if (index < PresetButtons.Length)
-                    {
-                        DrawPresetButton(PresetButtons[index]);
-                    }
-                    else
-                    {
-                        GUILayout.FlexibleSpace();
-                    }
+                    PhysBoneMotionDriver.Stop();
+                    Repaint();
                 }
 
-                EditorGUILayout.EndHorizontal();
+                GUI.backgroundColor = previousColor;
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            // The stop button above stays usable even when the target becomes
+            // null; only the preset buttons themselves require a target.
+            using (new EditorGUI.DisabledScope(_physBone == null))
+            {
+                const int columns = 3;
+                for (var i = 0; i < PresetButtons.Length; i += columns)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    for (var j = 0; j < columns; j++)
+                    {
+                        var index = i + j;
+                        if (index < PresetButtons.Length)
+                        {
+                            DrawPresetButton(PresetButtons[index]);
+                        }
+                        else
+                        {
+                            GUILayout.FlexibleSpace();
+                        }
+                    }
+
+                    EditorGUILayout.EndHorizontal();
+                }
             }
         }
 
@@ -1358,6 +1556,35 @@ namespace AvatarChamber.PhysBoneMotion
             {
                 StartPreset(button.Preset);
             }
+        }
+
+        private void DrawLimitStatus()
+        {
+            if (_physBone == null)
+            {
+                return;
+            }
+
+            var limitType = PhysBoneReflection.GetFieldValue(_physBone, "limitType");
+            if (limitType == null)
+            {
+                return;
+            }
+
+            var limitName = limitType.ToString();
+            if (limitName == "None")
+            {
+                EditorGUILayout.HelpBox(
+                    T("当前限位类型为 None，播放时不会应用角度限制。"),
+                    MessageType.Warning);
+                return;
+            }
+
+            var maxAngleX = PhysBoneReflection.GetFloat(_physBone, "maxAngleX");
+            var maxAngleZ = PhysBoneReflection.GetFloat(_physBone, "maxAngleZ");
+            EditorGUILayout.LabelField(
+                F("当前限位：{0}（X {1:0}° / Z {2:0}°）", limitName, maxAngleX, maxAngleZ),
+                EditorStyles.miniLabel);
         }
 
         private void StartPreset(MotionPreset preset)
@@ -1420,10 +1647,6 @@ namespace AvatarChamber.PhysBoneMotion
                         PhysBoneMotionDriver.ActiveClipName)
                     : F("播放动画：{0}", PhysBoneMotionDriver.ActiveClipName);
                 EditorGUILayout.HelpBox(text, MessageType.Info);
-                if (GUILayout.Button(T("停止并复原"), GUILayout.Height(28f)))
-                {
-                    PhysBoneMotionDriver.Stop();
-                }
             }
             else if (PhysBoneMotionDriver.IsPlayingMotion)
             {
@@ -1435,10 +1658,6 @@ namespace AvatarChamber.PhysBoneMotion
                 }
 
                 EditorGUILayout.HelpBox(text, MessageType.Info);
-                if (GUILayout.Button(T("停止并复原"), GUILayout.Height(28f)))
-                {
-                    PhysBoneMotionDriver.Stop();
-                }
             }
             else if (EditorApplication.isPlaying)
             {
