@@ -6,7 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     /// <summary>
     /// Saves PhysBone parameter edits made in Play Mode back to the edit-mode scene.
@@ -15,8 +15,8 @@ namespace AvatarChamber.PhysBoneMotionPreview
     [InitializeOnLoad]
     public static class PhysBonePlayModeSave
     {
-        private const string SnapshotKey = "AvatarChamber.PhysBoneMotionPreview.SaveSnapshot";
-        private const string PendingKey = "AvatarChamber.PhysBoneMotionPreview.SavePending";
+        private const string SnapshotKey = "AvatarChamber.PhysBoneMotion.SaveSnapshot";
+        private const string PendingKey = "AvatarChamber.PhysBoneMotion.SavePending";
 
         // Only user-facing PhysBone configuration is written back.
         // Runtime state (bones, chain id, player id, net id, caches) and UI foldouts are excluded
@@ -131,7 +131,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             SessionState.SetString(SnapshotKey, JsonUtility.ToJson(batch));
             SessionState.SetBool(PendingKey, true);
             Debug.Log(
-                "[PhysBone Motion Preview] "
+                "[PhysBone Motion] "
                 + PhysBoneLocalization.Tr("已暂存 Play Mode 参数，退出 Play Mode 后写回场景。"));
         }
 
@@ -315,7 +315,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (total > 0)
             {
                 Debug.Log(
-                    "[PhysBone Motion Preview] "
+                    "[PhysBone Motion] "
                     + PhysBoneLocalization.Format("已写回 {0} 项 Play Mode 参数。", total));
             }
         }
@@ -342,7 +342,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (physBone == null)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] "
+                    "[PhysBone Motion] "
                     + PhysBoneLocalization.Format(
                         "找不到要写回参数的 PhysBone：{0}",
                         snapshot.objectPath));
@@ -433,7 +433,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             catch (Exception exception)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] "
+                    "[PhysBone Motion] "
                     + PhysBoneLocalization.Format(
                         "写回参数失败：{0}",
                         property.propertyPath + " / " + exception.Message));

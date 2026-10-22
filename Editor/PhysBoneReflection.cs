@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     /// <summary>
     /// Reflection wrapper around VRCPhysBone so this package compiles in any project,

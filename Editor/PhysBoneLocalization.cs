@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     public enum PreviewLanguage
     {
@@ -20,7 +20,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
     /// </summary>
     public static class PhysBoneLocalization
     {
-        private const string LanguageKey = "AvatarChamber.PhysBoneMotionPreview.Language";
+        private const string LanguageKey = "AvatarChamber.PhysBoneMotion.Language";
 
         public static readonly string[] LanguageNames =
         {
@@ -144,7 +144,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             new Dictionary<string, Entry>
             {
                 // Window, tabs, common controls.
-                { "PhysBone 动态预览", new Entry("PhysBone Motion Preview", "PhysBone モーションプレビュー", "PhysBone 모션 미리보기") },
+                { "PhysBone 动态", new Entry("PhysBone Motion", "PhysBone モーション", "PhysBone 모션") },
                 { "预览", new Entry("Preview", "プレビュー", "미리보기") },
                 { "动骨", new Entry("PhysBone", "動骨", "피직본") },
                 { "设置", new Entry("Settings", "設定", "설정") },

@@ -1,4 +1,4 @@
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     public enum MotionPreset
     {

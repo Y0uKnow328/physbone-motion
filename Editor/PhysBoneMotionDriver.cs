@@ -8,7 +8,7 @@ using UnityEngine.Animations;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     /// <summary>
     /// Plays preset motions on a transform while in Play Mode, so VRCPhysBone can simulate.
@@ -17,7 +17,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
     [InitializeOnLoad]
     public static class PhysBoneMotionDriver
     {
-        private const string Prefix = "AvatarChamber.PhysBoneMotionPreview.";
+        private const string Prefix = "AvatarChamber.PhysBoneMotion.";
         private const string PendingKey = Prefix + "Pending";
         private const string PendingTimeKey = Prefix + "PendingTime";
         private const string SceneKey = Prefix + "Scene";
@@ -47,13 +47,13 @@ namespace AvatarChamber.PhysBoneMotionPreview
         private const string SimFollowKey = Prefix + "SimFollow";
         private const string SimSpeedKey = Prefix + "SimSpeed";
 
-        private const string BlockFuryPrefKey = "AvatarChamber.PhysBoneMotionPreview.BlockVrcfury";
-        private const string BlockNdmfPrefKey = "AvatarChamber.PhysBoneMotionPreview.BlockNdmf";
+        private const string BlockFuryPrefKey = "AvatarChamber.PhysBoneMotion.BlockVrcfury";
+        private const string BlockNdmfPrefKey = "AvatarChamber.PhysBoneMotion.BlockNdmf";
         private const string VrcfuryPlayModePref = "com.vrcfury.playMode";
 
         // Old preview-scoped restore markers, cleaned up on load.
-        private const string OldFuryRestorePendingPref = "AvatarChamber.PhysBoneMotionPreview.FuryRestorePending";
-        private const string OldFuryRestoreValuePref = "AvatarChamber.PhysBoneMotionPreview.FuryRestoreValue";
+        private const string OldFuryRestorePendingPref = "AvatarChamber.PhysBoneMotion.FuryRestorePending";
+        private const string OldFuryRestoreValuePref = "AvatarChamber.PhysBoneMotion.FuryRestoreValue";
 
         private const float PendingTimeoutSeconds = 120f;
 
@@ -365,7 +365,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (targetDriver == null)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] " + PhysBoneLocalization.Tr("找不到驱动对象。"));
+                    "[PhysBone Motion] " + PhysBoneLocalization.Tr("找不到驱动对象。"));
                 return;
             }
 
@@ -404,7 +404,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             string unsafeReason;
             if (!AnimationClipClassifier.IsSafeStandalone(clip, out unsafeReason))
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 已阻止可能畸形的动画："
+                Debug.LogWarning("[PhysBone Motion] 已阻止可能畸形的动画："
                                  + clip.name + " / " + unsafeReason);
                 return;
             }
@@ -445,14 +445,14 @@ namespace AvatarChamber.PhysBoneMotionPreview
                 }
                 else
                 {
-                    Debug.LogWarning("[PhysBone Motion Preview] 跳过不适合拼接播放的动画："
+                    Debug.LogWarning("[PhysBone Motion] 跳过不适合拼接播放的动画："
                                      + (clip != null ? clip.name : "null") + " / " + reason);
                 }
             }
 
             if (playlist.Count == 0)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 没有可拼接播放的 Humanoid 循环动画。");
+                Debug.LogWarning("[PhysBone Motion] 没有可拼接播放的 Humanoid 循环动画。");
                 return;
             }
 
@@ -530,7 +530,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
                 SessionState.GetString(SimAvatarKey, string.Empty));
             if (avatarRoot == null)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 模拟启动时找不到角色根节点。");
+                Debug.LogWarning("[PhysBone Motion] 模拟启动时找不到角色根节点。");
                 return;
             }
 
@@ -594,7 +594,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
                     else
                     {
                         Debug.LogWarning(
-                            "[PhysBone Motion Preview] 找不到 GoLocoBaseWD，"
+                            "[PhysBone Motion] 找不到 GoLocoBaseWD，"
                             + "模拟只会移动角色，不播放游戏动画。");
                     }
                 }
@@ -746,7 +746,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (rebuilt == null || !rebuilt.isValid || !rebuilt.isHuman)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] 角色 Avatar 与当前骨骼比例不一致，"
+                    "[PhysBone Motion] 角色 Avatar 与当前骨骼比例不一致，"
                     + "自动重建失败，播放动画时可能出现拉伸。");
                 return;
             }
@@ -754,7 +754,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             animator.avatar = rebuilt;
             _simAvatarRebuilt = true;
             Debug.Log(
-                "[PhysBone Motion Preview] 已按场景骨骼比例重建临时 Avatar（"
+                "[PhysBone Motion] 已按场景骨骼比例重建临时 Avatar（"
                 + ratio.ToString("0.000") + "），避免模拟动画拉伸。");
         }
 
@@ -1179,7 +1179,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (avatarRoot == null)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] " + PhysBoneLocalization.Tr("在 Play Mode 中找不到角色根节点。"));
+                    "[PhysBone Motion] " + PhysBoneLocalization.Tr("在 Play Mode 中找不到角色根节点。"));
                 return;
             }
 
@@ -1197,7 +1197,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
                     return;
                 }
 
-                Debug.LogWarning("[PhysBone Motion Preview] 拼接播放列表为空。");
+                Debug.LogWarning("[PhysBone Motion] 拼接播放列表为空。");
                 return;
             }
 
@@ -1206,7 +1206,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
                 SessionState.GetString(ClipNameKey, string.Empty));
             if (clip == null)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 找不到要播放的动画。");
+                Debug.LogWarning("[PhysBone Motion] 找不到要播放的动画。");
                 return;
             }
 
@@ -1248,7 +1248,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             string unsafeReason;
             if (!AnimationClipClassifier.IsSafeStandalone(clip, out unsafeReason))
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 已阻止可能畸形的动画："
+                Debug.LogWarning("[PhysBone Motion] 已阻止可能畸形的动画："
                                  + clip.name + " / " + unsafeReason);
                 return;
             }
@@ -1263,7 +1263,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
 
             if (animator == null)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 角色上没有 Animator，无法播放动画。");
+                Debug.LogWarning("[PhysBone Motion] 角色上没有 Animator，无法播放动画。");
                 return;
             }
 
@@ -1272,7 +1272,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             _clipLoop = loop;
             _clipPoseSnapshot = CapturePose(avatarRoot);
 
-            _clipGraph = PlayableGraph.Create("PhysBone Motion Preview Clip");
+            _clipGraph = PlayableGraph.Create("PhysBone Motion Clip");
             var output = AnimationPlayableOutput.Create(_clipGraph, "Clip", animator);
             _clipPlayable = AnimationClipPlayable.Create(_clipGraph, clip);
             _clipPlayable.SetApplyFootIK(false);
@@ -1306,14 +1306,14 @@ namespace AvatarChamber.PhysBoneMotionPreview
 
             if (animator == null)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 角色上没有 Animator，无法播放动画。");
+                Debug.LogWarning("[PhysBone Motion] 角色上没有 Animator，无法播放动画。");
                 return;
             }
 
             if (!animator.isHuman)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] 角色 Animator 不是 Humanoid，"
+                    "[PhysBone Motion] 角色 Animator 不是 Humanoid，"
                     + "拼接播放可能导致骨骼拉伸，已取消。");
                 return;
             }
@@ -1328,14 +1328,14 @@ namespace AvatarChamber.PhysBoneMotionPreview
                 }
                 else
                 {
-                    Debug.LogWarning("[PhysBone Motion Preview] 跳过不适合拼接播放的动画："
+                    Debug.LogWarning("[PhysBone Motion] 跳过不适合拼接播放的动画："
                                      + (clip != null ? clip.name : "null") + " / " + reason);
                 }
             }
 
             if (playlist.Count == 0)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] 没有可拼接播放的 Humanoid 循环动画。");
+                Debug.LogWarning("[PhysBone Motion] 没有可拼接播放的 Humanoid 循环动画。");
                 return;
             }
 
@@ -1345,7 +1345,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             _clipPlaylistLoop = loop;
             _clipPoseSnapshot = CapturePose(avatarRoot);
 
-            _clipGraph = PlayableGraph.Create("PhysBone Motion Preview Playlist");
+            _clipGraph = PlayableGraph.Create("PhysBone Motion Playlist");
             _clipOutput = AnimationPlayableOutput.Create(_clipGraph, "Clip", animator);
             _clipGraph.Play();
 
@@ -1912,7 +1912,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (targetTransform == null)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] " + PhysBoneLocalization.Tr("在 Play Mode 中找不到目标对象。"));
+                    "[PhysBone Motion] " + PhysBoneLocalization.Tr("在 Play Mode 中找不到目标对象。"));
                 return;
             }
 
@@ -1921,7 +1921,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (physBone == null)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] " + PhysBoneLocalization.Tr("目标对象上没有 VRCPhysBone。"));
+                    "[PhysBone Motion] " + PhysBoneLocalization.Tr("目标对象上没有 VRCPhysBone。"));
                 return;
             }
 
@@ -1935,7 +1935,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (driver == null)
             {
                 Debug.LogWarning(
-                    "[PhysBone Motion Preview] " + PhysBoneLocalization.Tr("找不到驱动对象。"));
+                    "[PhysBone Motion] " + PhysBoneLocalization.Tr("找不到驱动对象。"));
                 return;
             }
 

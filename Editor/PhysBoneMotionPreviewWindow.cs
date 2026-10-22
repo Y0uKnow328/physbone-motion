@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     public class PhysBoneMotionPreviewWindow : EditorWindow
     {
-        private const string MenuPath = "Tools/Avatar Chamber/PhysBone 动态预览";
+        private const string MenuPath = "Tools/Avatar Chamber/PhysBone 动态";
 
         private static string T(string text)
         {
@@ -98,7 +98,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
         [MenuItem(MenuPath)]
         public static void OpenWindow()
         {
-            var window = GetWindow<PhysBoneMotionPreviewWindow>(T("PhysBone 动态预览"));
+            var window = GetWindow<PhysBoneMotionPreviewWindow>(T("PhysBone 动态"));
             window.minSize = new Vector2(360f, 520f);
             window.Show();
         }
@@ -110,7 +110,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             EditorApplication.update += OnEditorUpdate;
             PhysBoneMotionDriver.StateChanged += Repaint;
             PhysBoneLocalization.LanguageChanged += OnLanguageChanged;
-            titleContent = new GUIContent(T("PhysBone 动态预览"));
+            titleContent = new GUIContent(T("PhysBone 动态"));
             RefreshSelection();
         }
 
@@ -138,7 +138,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
 
         private void OnLanguageChanged()
         {
-            titleContent = new GUIContent(T("PhysBone 动态预览"));
+            titleContent = new GUIContent(T("PhysBone 动态"));
             Repaint();
         }
 
@@ -977,7 +977,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             if (selected != current)
             {
                 PhysBoneLocalization.Language = (PreviewLanguage)selected;
-                titleContent = new GUIContent(T("PhysBone 动态预览"));
+                titleContent = new GUIContent(T("PhysBone 动态"));
                 Repaint();
             }
         }
@@ -1365,7 +1365,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
             var driver = GetDriver();
             if (_physBone == null || driver == null)
             {
-                Debug.LogWarning("[PhysBone Motion Preview] " + T("没有可预览的动骨或驱动对象。"));
+                Debug.LogWarning("[PhysBone Motion] " + T("没有可预览的动骨或驱动对象。"));
                 return;
             }
 

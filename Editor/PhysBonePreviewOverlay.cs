@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     /// <summary>
     /// Scene view overlay for the preview: bone chain visualization and gizmo-like navigation.
@@ -10,7 +10,7 @@ namespace AvatarChamber.PhysBoneMotionPreview
     [InitializeOnLoad]
     public static class PhysBonePreviewOverlay
     {
-        private const string ShowBonesKey = "AvatarChamber.PhysBoneMotionPreview.ShowBones";
+        private const string ShowBonesKey = "AvatarChamber.PhysBoneMotion.ShowBones";
         private static Vector2 _lastSceneMousePosition;
         private static bool _simW;
         private static bool _simA;

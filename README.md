@@ -1,16 +1,16 @@
-# PhysBone Motion Preview
+# PhysBone Motion
 
-**在 Unity 编辑器里预览 VRChat PhysBone 的摆动、惯性和链式联动，并直接编辑完整的 `VRCPhysBone` 参数，减少手动进出 Play Mode 和反复晃动角色的次数。**
+**在 Unity 编辑器里查看 VRChat PhysBone 的摆动、惯性和链式联动，并直接编辑完整的 `VRCPhysBone` 参数，减少手动进出 Play Mode 和反复晃动角色的次数。**
 
-Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本語 / 한국어 · v0.19.0
+Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本語 / 한국어 · v1.0.0
 
-> Preview VRChat PhysBone motion and edit the full `VRCPhysBone` settings directly in the Unity editor, without repeatedly entering Play Mode and shaking the avatar by hand.
+> Inspect VRChat PhysBone motion and edit the full `VRCPhysBone` settings directly in the Unity editor, without repeatedly entering Play Mode and shaking the avatar by hand.
 
 ---
 
 ## English Quick Start
 
-1. Open `Tools > Avatar Chamber > PhysBone 动态预览`.
+1. Open `Tools > Avatar Chamber > PhysBone 动态`.
 2. Select any part of your avatar in the Hierarchy.
 3. Choose a target PhysBone, adjust the parameters, or click a preset.
 4. To change PhysBone parameters in Play Mode, edit them in the **PhysBone** tab, then use **Save Changes** or **Save & Exit**.
@@ -51,7 +51,7 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 
 ## 快速开始
 
-1. 打开菜单 `Tools/Avatar Chamber/PhysBone 动态预览`
+1. 打开菜单 `Tools/Avatar Chamber/PhysBone 动态`
 2. 在 Hierarchy 中选中角色的任意部位（骨骼、网格、Avatar 根节点都可以）
 3. 在「预览」标签用「目标动骨」下拉框选择要预览的 PhysBone
 4. 调整幅度、频率、时长，点击任意预设动作；时长为 `0` 表示循环播放
@@ -79,9 +79,9 @@ Unity 2022.3 · VRChat Avatars SDK · Editor-only · 中文 / English / 日本�
 | 日本語 | 日本語 |
 | 한국어 | 한국어 |
 
-切换后立即生效，并保存在本机 `EditorPrefs` 的 `AvatarChamber.PhysBoneMotionPreview.Language` 中。主窗口标题、标签、按钮、提示、完整 PhysBone 设置和悬停说明都会跟随语言；语言名称本身保持各自的母语写法。
+切换后立即生效，并保存在本机 `EditorPrefs` 的 `AvatarChamber.PhysBoneMotion.Language` 中。主窗口标题、标签、按钮、提示、完整 PhysBone 设置和悬停说明都会跟随语言；语言名称本身保持各自的母语写法。
 
-> Unity 菜单路径 `Tools/Avatar Chamber/PhysBone 动态预览` 是 `[MenuItem]` 的编译期常量，不能随语言动态切换；窗口标题和窗口内内容会正常切换。
+> Unity 菜单路径 `Tools/Avatar Chamber/PhysBone 动态` 是 `[MenuItem]` 的编译期常量，不能随语言动态切换；窗口标题和窗口内内容会正常切换。
 
 ## 物理预览控制栏
 

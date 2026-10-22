@@ -1,6 +1,6 @@
 {
   "name": "PhysBoneMotionPreview.Editor",
-  "rootNamespace": "AvatarChamber.PhysBoneMotionPreview",
+  "rootNamespace": "AvatarChamber.PhysBoneMotion",
   "references": [],
   "includePlatforms": [
     "Editor"

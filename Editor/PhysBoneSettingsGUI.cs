@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace AvatarChamber.PhysBoneMotionPreview
+namespace AvatarChamber.PhysBoneMotion
 {
     /// <summary>
     /// Complete Chinese editor for VRCPhysBone, plus a compact force strip for the preview tab.
