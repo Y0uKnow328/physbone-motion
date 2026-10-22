@@ -245,14 +245,12 @@ namespace AvatarChamber.PhysBoneMotion
 
         private static string SnapshotIdentityKey(SavedSnapshot snapshot)
         {
-            // Prefer the name path so a shifted sibling index still identifies
-            // the same bone. Fall back to the index path for legacy snapshots.
-            var objectKey = string.IsNullOrEmpty(snapshot.objectNamePath)
-                ? snapshot.objectPath
-                : snapshot.objectNamePath;
+            // Keep the sibling path in the identity: name paths are only used
+            // to recover from shifted indices, and two different children can
+            // legitimately share the same name path.
             return snapshot.scenePath
                 + "|"
-                + objectKey
+                + snapshot.objectPath
                 + "|"
                 + snapshot.componentIndex;
         }
